@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: test-sts
+  namespace: sandbox
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: test-sts
+  template:
+    metadata:
+      labels:
+        app: test-sts
+    spec:
+      containers:
+      - name: ubuntu
+        image: ghcr.io/cybozu/ubuntu:24.04
+        command: ["pause"]
+        volumeMounts:
+        - mountPath: /data
+          name: data
+      securityContext:
+        runAsGroup: 10000
+        runAsUser: 10000
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: topolvm-flash1-xfs
+      volumeMode: Filesystem
